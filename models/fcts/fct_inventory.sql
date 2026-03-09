@@ -7,7 +7,14 @@
 
 with source as (
 
-    select * from {{ ref('stg_modelco__inventory') }}
+    select
+        part_id,
+        supplier_id,
+        available_amount,
+        supplier_cost_usd,
+        comment,
+        load_dts
+    from {{ source('operations', 'inventory') }}
 
     {% if is_incremental() %}
         where load_dts > (select max(load_dts) from {{ this }})

@@ -25,12 +25,6 @@ dbt deps             # Install dbt packages from packages.yml
 # Run/test a single model
 dbt run --select <model_name>
 dbt test --select <model_name>
-
-# Run a layer
-dbt run --select staging.*
-dbt run --select dims.*
-dbt run --select fcts.*
-dbt run --select reporting.*
 ```
 
 ## Architecture
@@ -39,14 +33,23 @@ dbt run --select reporting.*
 
 | Layer | Path | Materialization | Purpose |
 |-------|------|-----------------|---------|
-| Staging | `models/staging/modelco/` | Views | Raw transforms from TPC-H source |
+| Staging | `models/staging/modelco/` | Views | Thin pass-through from `operations` source (minimal models remain) |
 | Dimensions | `models/dims/` | Incremental tables | Type 2 SCD (valid_from/valid_to/is_current) |
 | Facts | `models/fcts/` | Tables | Type 1 SCD (overwrite on change) |
 | Reporting | `models/reporting/` | Tables | Denormalized views for analytics |
 
-### Data Source
+Most dimension and fact models read **directly from the `operations` source** rather than through staging models.
 
-Source data comes from Snowflake's built-in TPC-H sample dataset (`snowflake_sample_data.tpch_sf1`), defined in `models/sources.yaml`. Tables: customer, orders, nations, parts, suppliers, lineitems, partsupp.
+### Data Sources
+
+Two sources are defined in `models/sources.yaml`:
+
+| Source | Database/Schema | Purpose |
+|--------|----------------|---------|
+| `sample_data` | `snowflake_sample_data.tpch_sf1` | Snowflake built-in TPC-H data (orders, customer, nation) |
+| `operations` | `demo_tpch.operations_raw` | Pre-modeled operational tables with business-friendly column names and `load_dts` timestamp; has freshness checks (warn: 1 day, error: 7 days) |
+
+The `operations` source tables (`part`, `location`, `supplier`, `customer`, `sales_order`, `inventory`, `lineitem`) are created from TPC-H data via the SQL setup script in the README. See README for the full DDL.
 
 ### Key Patterns
 

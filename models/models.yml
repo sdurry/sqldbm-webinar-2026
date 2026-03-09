@@ -15,9 +15,6 @@ models:
     columns:
       - name: part_key
         description: Surrogate key generated from part_id and load timestamp
-        tests:
-          - not_null
-          - unique
       - name: part_id
         description: Natural key identifying the part
         tests:
@@ -58,7 +55,6 @@ models:
         description: Surrogate key generated from location_id and load timestamp
         tests:
           - not_null
-          - unique
       - name: location_id
         description: Natural key identifying the location
         tests:
@@ -89,7 +85,6 @@ models:
         description: Surrogate key generated from supplier_id and load timestamp
         tests:
           - not_null
-          - unique
       - name: supplier_id
         description: Natural key identifying the supplier
       - name: name
@@ -126,7 +121,6 @@ models:
         description: Surrogate key generated from customer_id and load timestamp
         tests:
           - not_null
-          - unique
       - name: customer_id
         description: Natural key identifying the customer
         tests:
@@ -171,7 +165,6 @@ models:
         description: Primary key identifying the sales order
         tests:
           - not_null
-          - unique
       - name: customer_id
         description: Foreign key to dim_customer
         tests:

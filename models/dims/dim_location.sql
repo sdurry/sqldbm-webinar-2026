@@ -7,7 +7,13 @@
 
 with source as (
 
-    select * from {{ ref('stg_modelco__location') }}
+    select
+        location_id,
+        name,
+        region_id,
+        comment,
+        load_dts
+    from {{ source('operations', 'location') }}
 
     {% if is_incremental() %}
         where load_dts > (select max(valid_from) from {{ this }})
@@ -18,7 +24,7 @@ with source as (
 transformed as (
 
     select
-        SHA1_BINARY(location_id::varchar || ':' || load_dts::varchar) as location_key,
+        SHA1_BINARY('location_id'||'load_dts') as location_key,
         location_id,
         name,
         region_id,

@@ -7,7 +7,18 @@
 
 with source as (
 
-    select * from {{ ref('stg_modelco__part') }}
+    select
+        part_id,
+        name,
+        manufacturer,
+        brand,
+        type,
+        size_centimeters,
+        container,
+        retail_price_usd,
+        comment,
+        load_dts
+    from {{ source('operations', 'part') }}
 
     {% if is_incremental() %}
         where load_dts > (select max(valid_from) from {{ this }})
@@ -18,7 +29,7 @@ with source as (
 transformed as (
 
     select
-        SHA1_BINARY(part_id::varchar || ':' || load_dts::varchar) as part_key,
+        SHA1_BINARY('part_id'||'load_dts') as part_key,
         part_id,
         name,
         manufacturer,

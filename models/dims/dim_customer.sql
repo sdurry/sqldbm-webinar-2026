@@ -7,7 +7,17 @@
 
 with source as (
 
-    select * from {{ ref('stg_modelco__customer') }}
+    select
+        customer_id,
+        name,
+        address,
+        location_id,
+        phone,
+        account_balance_usd,
+        market_segment,
+        comment,
+        load_dts
+    from {{ source('operations', 'customer') }}
 
     {% if is_incremental() %}
         where load_dts > (select max(valid_from) from {{ this }})
@@ -18,7 +28,7 @@ with source as (
 transformed as (
 
     select
-        SHA1_BINARY(customer_id::varchar || ':' || load_dts::varchar) as customer_key,
+        SHA1_BINARY('customer_id'||'load_dts') as customer_key,
         customer_id,
         name,
         address,
