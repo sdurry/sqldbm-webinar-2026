@@ -33,9 +33,11 @@ clean-targets:         # directories to be removed by `dbt clean`
 # using the `{{ config(...) }}` macro.
 models:
   sqldbm_webinar:
+    staging:
+      +materialized: view
     dims:
       +materialized: table
-    fct:
+    fcts:
       +materialized: table
 
 flags:
