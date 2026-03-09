@@ -1,0 +1,93 @@
+version: 2
+
+models:
+
+  - name: inventory_supplier
+    config:
+      schema: rep
+    description: >
+      Reporting table that enriches warehouse inventory facts with
+      part and supplier dimension attributes. Joins fct_inventory
+      to current dim_part and dim_supplier records.
+    columns:
+      - name: part_id
+        description: Part of composite primary key, foreign key to dim_part
+        tests:
+          - not_null
+      - name: supplier_id
+        description: Part of composite primary key, foreign key to dim_supplier
+        tests:
+          - not_null
+      - name: available_amount
+        description: Number of parts available for sale
+      - name: supplier_cost_usd
+        description: Original cost paid to supplier in USD
+      - name: part_name
+        description: Part name from dim_part
+      - name: part_manufacturer
+        description: Part manufacturer from dim_part
+      - name: part_brand
+        description: Part brand from dim_part
+      - name: part_type
+        description: Part type classification from dim_part
+      - name: part_size_centimeters
+        description: Part size in centimeters from dim_part
+      - name: part_container
+        description: Container type from dim_part
+      - name: part_retail_price_usd
+        description: Retail price in USD from dim_part
+      - name: supplier_name
+        description: Supplier name from dim_supplier
+      - name: supplier_address
+        description: Supplier address from dim_supplier
+      - name: supplier_location_id
+        description: Supplier location foreign key from dim_supplier
+      - name: supplier_phone
+        description: Supplier phone number from dim_supplier
+      - name: supplier_account_balance_usd
+        description: Supplier account balance in USD from dim_supplier
+      - name: load_dts
+        description: Timestamp when the inventory record was loaded
+
+  - name: sales_order_customer
+    config:
+      schema: rep
+    description: >
+      Reporting table that enriches sales order facts with
+      customer dimension attributes. Joins fct_sales_order
+      to current dim_customer records.
+    columns:
+      - name: sales_order_id
+        description: Primary key identifying the sales order
+        tests:
+          - not_null
+      - name: customer_id
+        description: Foreign key to dim_customer
+        tests:
+          - not_null
+      - name: order_status
+        description: Current status of the order
+      - name: total_price_usd
+        description: Total order price in USD
+      - name: order_date
+        description: Date the order was placed
+      - name: order_priority
+        description: Priority level of the order
+      - name: clerk
+        description: Clerk who processed the order
+      - name: ship_priority
+        description: Shipping priority
+      - name: customer_name
+        description: Customer name from dim_customer
+      - name: customer_address
+        description: Customer address from dim_customer
+      - name: customer_location_id
+        description: Customer location foreign key from dim_customer
+      - name: customer_phone
+        description: Customer phone number from dim_customer
+      - name: customer_account_balance_usd
+        description: Customer account balance in USD from dim_customer
+      - name: customer_market_segment
+        description: Customer market segment from dim_customer
+      - name: load_dts
+        description: Timestamp when the order record was loaded

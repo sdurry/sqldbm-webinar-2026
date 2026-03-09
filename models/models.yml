@@ -1,0 +1,261 @@
+version: 2
+
+models:
+
+  # ──────────────────────────────────────────────
+  # Dimensions (Type 2 SCD)
+  # ──────────────────────────────────────────────
+
+  - name: dim_part
+    config:
+      schema: stage
+    description: >
+      Type 2 slowly changing dimension for parts.
+      Tracks historical changes to part attributes over time.
+    columns:
+      - name: part_key
+        description: Surrogate key generated from part_id and load timestamp
+      - name: part_id
+        description: Natural key identifying the part
+        tests:
+          - not_null
+      - name: name
+        description: Part name
+      - name: manufacturer
+        description: Part manufacturer
+      - name: brand
+        description: Part brand
+      - name: type
+        description: Part type classification
+      - name: size_centimeters
+        description: Part size in centimeters
+      - name: container
+        description: Container type for the part
+      - name: retail_price_usd
+        description: Retail price in USD
+      - name: comment
+        description: Free-text comment
+      - name: valid_from
+        description: Timestamp when this version of the record became effective
+        tests:
+          - not_null
+      - name: valid_to
+        description: Timestamp when this version was superseded (null if current)
+      - name: is_current
+        description: Flag indicating whether this is the current version of the record
+
+  - name: dim_location
+    config:
+      schema: stage
+    description: >
+      Type 2 slowly changing dimension for locations (nations).
+      Tracks historical changes to location attributes over time.
+    columns:
+      - name: location_key
+        description: Surrogate key generated from location_id and load timestamp
+        tests:
+          - not_null
+      - name: location_id
+        description: Natural key identifying the location
+        tests:
+          - not_null
+      - name: name
+        description: Location name
+      - name: region_id
+        description: Region the location belongs to
+      - name: comment
+        description: Free-text comment
+      - name: valid_from
+        description: Timestamp when this version of the record became effective
+        tests:
+          - not_null
+      - name: valid_to
+        description: Timestamp when this version was superseded (null if current)
+      - name: is_current
+        description: Flag indicating whether this is the current version of the record
+
+  - name: dim_supplier
+    config:
+      schema: stage
+    description: >
+      Type 2 slowly changing dimension for suppliers.
+      Tracks historical changes to supplier attributes over time.
+    columns:
+      - name: supplier_key
+        description: Surrogate key generated from supplier_id and load timestamp
+        tests:
+          - not_null
+      - name: supplier_id
+        description: Natural key identifying the supplier
+      - name: name
+        description: Supplier name
+      - name: address
+        description: Supplier address
+      - name: location_id
+        description: Foreign key to dim_location
+        tests:
+          - not_null
+      - name: phone
+        description: Supplier phone number
+      - name: account_balance_usd
+        description: Supplier account balance in USD
+      - name: comment
+        description: Free-text comment
+      - name: valid_from
+        description: Timestamp when this version of the record became effective
+        tests:
+          - not_null
+      - name: valid_to
+        description: Timestamp when this version was superseded (null if current)
+      - name: is_current
+        description: Flag indicating whether this is the current version of the record
+
+  - name: dim_customer
+    config:
+      schema: stage
+    description: >
+      Type 2 slowly changing dimension for customers.
+      Tracks historical changes to customer attributes over time.
+    columns:
+      - name: customer_key
+        description: Surrogate key generated from customer_id and load timestamp
+        tests:
+          - not_null
+      - name: customer_id
+        description: Natural key identifying the customer
+        tests:
+          - not_null
+      - name: name
+        description: Customer name
+      - name: address
+        description: Customer address
+      - name: location_id
+        description: Foreign key to dim_location
+        tests:
+          - not_null
+      - name: phone
+        description: Customer phone number
+      - name: account_balance_usd
+        description: Customer account balance in USD
+      - name: market_segment
+        description: Market segment the customer belongs to
+      - name: comment
+        description: Free-text comment
+      - name: valid_from
+        description: Timestamp when this version of the record became effective
+        tests:
+          - not_null
+      - name: valid_to
+        description: Timestamp when this version was superseded (null if current)
+      - name: is_current
+        description: Flag indicating whether this is the current version of the record
+
+  # ──────────────────────────────────────────────
+  # Facts (Type 1 SCD)
+  # ──────────────────────────────────────────────
+
+  - name: fct_sales_order
+    config:
+      schema: stage
+    description: >
+      Type 1 fact table for sales orders.
+      Records are overwritten with the latest values on each load.
+    columns:
+      - name: sales_order_id
+        description: Primary key identifying the sales order
+        tests:
+          - not_null
+      - name: customer_id
+        description: Foreign key to dim_customer
+        tests:
+          - not_null
+      - name: order_status
+        description: Current status of the order
+      - name: total_price_usd
+        description: Total order price in USD
+      - name: order_date
+        description: Date the order was placed
+      - name: order_priority
+        description: Priority level of the order
+      - name: clerk
+        description: Clerk who processed the order
+      - name: ship_priority
+        description: Shipping priority
+      - name: comment
+        description: Free-text comment
+      - name: load_dts
+        description: Timestamp when the record was loaded
+
+  - name: fct_inventory
+    config:
+      schema: stage
+    description: >
+      Type 1 fact table for warehouse inventory.
+      Records are overwritten with the latest values on each load.
+    columns:
+      - name: part_id
+        description: Part of composite primary key, foreign key to dim_part
+        tests:
+          - not_null
+      - name: supplier_id
+        description: Part of composite primary key, foreign key to dim_supplier
+        tests:
+          - not_null
+      - name: available_amount
+        description: Number of parts available for sale
+      - name: supplier_cost_usd
+        description: Original cost paid to supplier in USD
+      - name: comment
+        description: Free-text comment
+      - name: load_dts
+        description: Timestamp when the record was loaded
+
+  - name: fct_lineitem
+    config:
+      schema: stage
+    description: >
+      Type 1 fact table for order line items.
+      Records are overwritten with the latest values on each load.
+    columns:
+      - name: line_number
+        description: Part of composite primary key, line number within the order
+        tests:
+          - not_null
+      - name: sales_order_id
+        description: Part of composite primary key, foreign key to fct_sales_order
+        tests:
+          - not_null
+      - name: part_id
+        description: Foreign key to dim_part
+        tests:
+          - not_null
+      - name: supplier_id
+        description: Foreign key to dim_supplier
+        tests:
+          - not_null
+      - name: quantity
+        description: Quantity ordered
+      - name: extended_price_usd
+        description: Extended price in USD
+      - name: discount_percent
+        description: Discount percentage applied
+      - name: tax_percent
+        description: Tax percentage applied
+      - name: return_flag
+        description: Return flag indicator
+      - name: line_status
+        description: Line item status
+      - name: ship_date
+        description: Date the line item was shipped
+      - name: commit_date
+        description: Committed delivery date
+      - name: receipt_date
+        description: Date the line item was received
+      - name: ship_instructions
+        description: Shipping instructions
+      - name: ship_mode
+        description: Shipping mode
+      - name: comment
+        description: Free-text comment
+      - name: load_dts
+        description: Timestamp when the record was loaded
