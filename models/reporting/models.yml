@@ -1,53 +1,77 @@
 version: 2
 
 models:
-
   - name: inventory_supplier
     config:
       schema: rep
+      contract:
+        enforced: true      
     description: >
       Reporting table that enriches warehouse inventory facts with
       part and supplier dimension attributes. Joins fct_inventory
       to current dim_part and dim_supplier records.
+    constraints:
+      - type: primary_key
+        columns:
+          - SUPPLIER_ID
+        name: PK_1
     columns:
-      - name: part_id
-        description: Part of composite primary key, foreign key to dim_part
-        tests:
-          - not_null
-      - name: supplier_id
-        description: Part of composite primary key, foreign key to dim_supplier
-        tests:
-          - not_null
-      - name: available_amount
-        description: Number of parts available for sale
-      - name: supplier_cost_usd
-        description: Original cost paid to supplier in USD
-      - name: part_name
-        description: Part name from dim_part
-      - name: part_manufacturer
-        description: Part manufacturer from dim_part
-      - name: part_brand
-        description: Part brand from dim_part
-      - name: part_type
-        description: Part type classification from dim_part
-      - name: part_size_centimeters
-        description: Part size in centimeters from dim_part
-      - name: part_container
-        description: Container type from dim_part
-      - name: part_retail_price_usd
-        description: Retail price in USD from dim_part
-      - name: supplier_name
-        description: Supplier name from dim_supplier
-      - name: supplier_address
-        description: Supplier address from dim_supplier
-      - name: supplier_location_id
-        description: Supplier location foreign key from dim_supplier
-      - name: supplier_phone
-        description: Supplier phone number from dim_supplier
-      - name: supplier_account_balance_usd
-        description: Supplier account balance in USD from dim_supplier
-      - name: load_dts
-        description: Timestamp when the inventory record was loaded
+      - name: SUPPLIER_ID
+        data_type: number(38,0)
+        description: Unique identifier for the supplier
+        constraints:
+          - type: not_null
+      - name: PART_ID
+        data_type: number(38,0)
+        description: Unique identifier for the part
+      - name: AVAILABLE_AMOUNT
+        data_type: number(38,0)
+        description: Quantity of parts available from this supplier
+      - name: SUPPLIER_COST_USD
+        data_type: number(12,2)
+        description: Cost per part charged by the supplier in USD
+      - name: PART_NAME
+        data_type: varchar(16777216)
+        description: Name of the part
+      - name: PART_MANUFACTURER
+        data_type: varchar(16777216)
+        description: Manufacturer of the part
+      - name: PART_BRAND
+        data_type: varchar(16777216)
+        description: Brand of the part
+      - name: PART_TYPE
+        data_type: varchar(16777216)
+        description: Type or category of the part
+      - name: PART_SIZE_CENTIMETERS
+        data_type: number(38,0)
+        description: Size of the part in centimeters
+      - name: PART_CONTAINER
+        data_type: varchar(16777216)
+        description: Container type or packaging of the part
+      - name: PART_RETAIL_PRICE_USD
+        data_type: number(12,2)
+        description: Retail price of the part in USD
+      - name: SUPPLIER_NAME
+        data_type: varchar(16777216)
+        description: Name of the supplier
+      - name: SUPPLIER_ADDRESS
+        data_type: varchar(16777216)
+        description: Address of the supplier
+      - name: SUPPLIER_LOCATION_ID
+        data_type: number(38,0)
+        description: Unique identifier for the supplier location
+      - name: SUPPLIER_LOCATION_NAME
+        data_type: varchar(25)
+        description: Name of the location
+      - name: SUPPLIER_PHONE
+        data_type: varchar(16777216)
+        description: Phone number of the supplier
+      - name: SUPPLIER_ACCOUNT_BALANCE_USD
+        data_type: number(12,2)
+        description: Account balance of the supplier in USD
+      - name: LOAD_DTS
+        data_type: timestamp_ntz(9)
+        description: Timestamp when the record was loaded
 
   - name: sales_order_customer
     config:

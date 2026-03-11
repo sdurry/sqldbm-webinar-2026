@@ -24,6 +24,12 @@ suppliers as (
 
 ),
 
+locations as (
+
+    select * from {{ ref('dim_location') }}
+
+),
+
 final as (
 
     select
@@ -46,12 +52,16 @@ final as (
         s.phone               as supplier_phone,
         s.account_balance_usd as supplier_account_balance_usd,
 
+        l.name                as supplier_location_name,
+
         inv.load_dts
     from inventory inv
     left join parts p
         on inv.part_id = p.part_id
     left join suppliers s
         on inv.supplier_id = s.supplier_id
+    left join locations l
+        on s.location_id = l.location_id
 
 )
 
